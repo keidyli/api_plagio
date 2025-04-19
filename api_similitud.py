@@ -24,7 +24,7 @@ origins = [
 ]
 
 # --------------------------------------------------
-# App Initialization
+# Iniciando la Aplicacion
 # --------------------------------------------------
 # api_similitud.py
 
@@ -46,7 +46,7 @@ app.add_middleware(
 
 
 # --------------------------------------------------
-# Models
+# Modelos de Entrada y Salida
 # --------------------------------------------------
 class TituloPair(BaseModel):
     titulo_db: str = Field(..., min_length=1, example="Sistema de gestión de clientes")
@@ -61,7 +61,7 @@ class SimilitudResponse(BaseModel):
 
 
 # --------------------------------------------------
-# Utilities
+# Utilidades / Funciones Auxiliares: Cargando el Modelo de IA
 # --------------------------------------------------
 @lru_cache()
 def get_model() -> SentenceTransformer:
@@ -75,9 +75,28 @@ def get_model() -> SentenceTransformer:
 equivalencias: Dict[str, List[str]] = {
     "sistema": ["software", "aplicación", "herramienta", "plataforma", "entorno"],
     "gestión": ["administración", "control", "organización", "seguimiento", "monitoreo"],
+    "empresa": ["negocio", "compañía", "emprendimiento", "institución", "organización"],
+    "documentos": ["archivos", "expedientes", "documentación", "registros"],
+    "facturación": ["emitir recibos", "boletaje", "cobros", "transacciones", "pagos"],
+    "clientes": ["usuarios", "consumidores", "beneficiarios", "interesados"],
+    "virtual": ["online", "en línea", "a distancia", "remoto"],
+    "enseñanza a distancia": ["clases en línea", "educación remota", "educación a distancia", "formación virtual"],
+    "académica": ["educativa", "escolar", "formativa", "de enseñanza"],
+    "mensajería": ["whatsapp", "telegram", "messenger", "app de mensajería", "chat"],
+    "atención al cliente": ["soporte técnico", "servicio al cliente", "asistencia", "servicio al usuario", "ayuda"],
+    "aprendizaje": ["formación", "enseñanza", "proceso educativo", "capacitación"],
+    "matemáticas": ["cálculo", "habilidades numéricas", "aritmética", "resolución de problemas"],
+    "red": ["LAN", "infraestructura de red", "interconexión", "conectividad"],
+    "biblioteca": ["centro de recursos", "espacio académico", "repositorio de libros"],
+    "seguridad": ["vigilancia", "monitoreo", "protección", "control de acceso"],
+    "información": ["datos", "documentación", "registro", "contenido"],
+    "chatbot": ["asistente virtual", "bot de atención", "agente conversacional"],
+    "registro": ["inscripción", "entrada de datos", "formulario"],
+    "respaldo": ["copia de seguridad", "backup", "almacenamiento alterno"]
     # Agrega más equivalencias según necesidad
 }
-# Precompile regex patterns for performance
+
+# Optimizar el reemplazo de sinonimos
 compiled_patterns = []
 for base, synonyms in equivalencias.items():
     for synonym in synonyms:
@@ -103,7 +122,7 @@ def clasificar_similitud(score: float) -> str:
     if score >= 80:
         return "✅ Muy similar"
     if score >= 70:
-        return "⚠️ Similar pero diferente"
+        return "⚠️ Similar parcial / coincidencia tematica"
     return "❌ No similar"
 
 
@@ -140,7 +159,7 @@ async def comparar_titulos(pair: TituloPair):
             f"Similitud calculada: {similitud_rounded}% - Clasificación: {etiqueta}"
         )
 
-        if similitud_rounded >= 60:
+        if similitud_rounded >= 70:
             return SimilitudResponse(
                 similitud=similitud_rounded,
                 clasificacion=etiqueta,
